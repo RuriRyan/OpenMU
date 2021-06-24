@@ -29,7 +29,8 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
         /// <inheritdoc />
         public void HandleCommand(Player player, string command)
         {
-            var area = player.PersistenceContext.CreateNew<MonsterSpawnArea>();
+            var context = player.GameContext.PersistenceContextProvider.CreateNewContext();
+            var area = context.CreateNew<MonsterSpawnArea>();
             MonsterDefinition? monsterDefinition = null;
             foreach (var monster in player.GameContext.Configuration.Monsters)
             {
