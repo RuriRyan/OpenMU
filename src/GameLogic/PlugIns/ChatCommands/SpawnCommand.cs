@@ -8,6 +8,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
     using System.Runtime.InteropServices;
     using MUnique.OpenMU.DataModel.Configuration;
     using MUnique.OpenMU.DataModel.Entities;
+    using MUnique.OpenMU.GameLogic.NPC;
     using MUnique.OpenMU.PlugIns;
 
     /// <summary>
@@ -46,7 +47,13 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
                 return;
             }
 
-            area.GameMap = player.CurrentMap?.Definition;
+            var map = player.CurrentMap;
+            if (map is null)
+            {
+                return;
+            }
+
+            area.GameMap = map.Definition;
             area.MonsterDefinition = monsterDefinition;
             area.Quantity = 1;
             area.SpawnTrigger = SpawnTrigger.Automatic;
@@ -55,7 +62,9 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
             area.X2 = player.Position.X;
             area.Y2 = player.Position.Y;
 
-            player.CurrentMap?.Definition.MonsterSpawns.Add(area);
+            var npc = new Monster(area, monsterDefinition, map, new DefaultDropGenerator(player.GameContext.Configuration, Rand.GetRandomizer()), new BasicMonsterIntelligence(map), player.GameContext.PlugInManager);
+            npc.Initialize();
+            map.Add(npc);
             player.ShowMessage("Spawn successfully created");
         }
 
