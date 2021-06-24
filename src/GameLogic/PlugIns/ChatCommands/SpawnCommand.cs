@@ -30,7 +30,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
         public void HandleCommand(Player player, string command)
         {
             var area = player.PersistenceContext.CreateNew<MonsterSpawnArea>();
-            MonsterDefinition monsterDefinition = null;
+            MonsterDefinition? monsterDefinition = null;
             foreach (var monster in player.GameContext.Configuration.Monsters)
             {
                 if (monster.Designation == "Spider")
