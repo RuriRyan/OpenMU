@@ -37,7 +37,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
                 if (monster.Designation == "Spider")
                 {
                     monsterDefinition = monster;
-                    return;
+                    break;
                 }
             }
 
