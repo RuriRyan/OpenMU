@@ -45,9 +45,10 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
             }
 
             MonsterDefinition? monsterDefinition = null;
+            var searchName = arguments.MonsterName.Replace('_', ' ');
             foreach (var monster in player.GameContext.Configuration.Monsters)
             {
-                if (monster.Designation == arguments.MonsterName)
+                if (monster.Designation.Equals(searchName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     monsterDefinition = monster;
                     break;
@@ -65,7 +66,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
 
             area.GameMap = map.Definition;
             area.MonsterDefinition = monsterDefinition;
-            area.Quantity = arguments.Quantity.GetValueOrDefault(1);
+            area.Quantity = (short)(arguments.Quantity > 0 ? arguments.Quantity : 1);
             area.SpawnTrigger = SpawnTrigger.Automatic;
             area.X1 = player.Position.X;
             area.Y1 = player.Position.Y;

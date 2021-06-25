@@ -10,15 +10,15 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands.Arguments
     public class SpawnChatCommandArgs : ArgumentsBase
     {
         /// <summary>
-        /// Gets or sets the quantity.
-        /// </summary>
-        [Argument("quantity")]
-        public short? Quantity { get; set; }
-
-        /// <summary>
         /// Gets or sets the monster name.
         /// </summary>
         [Argument("monster")]
         public string? MonsterName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity.
+        /// </summary>
+        [Argument("quantity", false)]
+        public short Quantity { get; set; }
     }
 }
