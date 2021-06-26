@@ -61,7 +61,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
                 return;
             }
 
-            var context = player.GameContext.PersistenceContextProvider.CreateNewContext();
+            var context = player.GameContext.PersistenceContextProvider.CreateNewTypedContext<MonsterSpawnArea>();
             var area = context.CreateNew<MonsterSpawnArea>();
 
             area.GameMap = map.Definition;
@@ -72,6 +72,8 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
             area.Y1 = player.Position.Y;
             area.X2 = player.Position.X;
             area.Y2 = player.Position.Y;
+
+            map.Definition.MonsterSpawns.Add(area);
 
             for (int i = 0; i < area.Quantity; i++)
             {
