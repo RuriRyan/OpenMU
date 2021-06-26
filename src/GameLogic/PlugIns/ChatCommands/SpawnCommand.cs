@@ -73,10 +73,21 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
             area.X2 = player.Position.X;
             area.Y2 = player.Position.Y;
 
-            var npc = new Monster(area, monsterDefinition, map, new DefaultDropGenerator(player.GameContext.Configuration, Rand.GetRandomizer()), new BasicMonsterIntelligence(map), player.GameContext.PlugInManager);
-            npc.Initialize();
-            map.Add(npc);
-            player.ShowMessage("Spawn successfully created.");
+            for (int i = 0; i < area.Quantity; i++)
+            {
+                var npc = new Monster(area, monsterDefinition, map, new DefaultDropGenerator(player.GameContext.Configuration, Rand.GetRandomizer()), new BasicMonsterIntelligence(map), player.GameContext.PlugInManager);
+                npc.Initialize();
+                map.Add(npc);
+            }
+
+            if (context.SaveChanges())
+            {
+                player.ShowMessage("Spawn successfully created.");
+            }
+            else
+            {
+                player.ShowMessage("Could not save Spawn.");
+            }
         }
     }
 }
