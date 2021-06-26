@@ -77,7 +77,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
 
             for (int i = 0; i < area.Quantity; i++)
             {
-                var npc = new Monster(area, monsterDefinition, map, new DefaultDropGenerator(player.GameContext.Configuration, Rand.GetRandomizer()), new BasicMonsterIntelligence(map), player.GameContext.PlugInManager);
+                var npc = new Monster(area, monsterDefinition, map, new DefaultDropGenerator(player.GameContext.Configuration, Rand.GetRandomizer()), new BasicMonsterIntelligence(), player.GameContext.PlugInManager);
                 npc.Initialize();
                 map.Add(npc);
             }
