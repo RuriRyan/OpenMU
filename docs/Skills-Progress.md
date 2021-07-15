@@ -1,12 +1,18 @@
 ﻿# Progress of implemented Skills
 
-I want to give a overview about which skills are already implemented and which ones need some rework.
+I want to give a overview about which skills are already implemented and which
+ones need some rework.
 
 Some general notes:
-  * Elemental effects (poison, ice, etc.) are not yet implemented at all
-  * Area Damage Skills with explicit damage packets work, but are vulnerable to cheaters
-  * Area Damage Skills with implicit damage work, but directions are not considered yet - they hit targets in all directions. 
-  * All kind of skills which are somehow special are not working
+
+* Elemental effects (poison, ice, etc.) are not yet implemented at all
+
+* Area Damage Skills with explicit damage packets work, but are vulnerable to cheaters
+
+* Area Damage Skills with implicit damage work, but directions are not
+  considered yet - they hit targets in all directions.
+
+* All kind of skills which are somehow special are not working
 
 ## Normal Skills
 
@@ -123,10 +129,10 @@ Some general notes:
 | 269    | Charge                      | ?                                                                |
 | 270    | Phoenix Shot                | ?                                                                |
 
+## Master Skills
 
-## Master Skills:
-
-Note: Some skills have the state *unused*. They're not used in the game at season 6, but probably in later seasons. Therefore, they are also *not implemented*.
+Note: Some skills have the state *unused*. They're not used in the game at
+season 6, but probably in later seasons. Therefore, they are also *not implemented*.
 
 | Number | Name                          | State           |
 |--------|-------------------------------|-----------------|
@@ -401,5 +407,3 @@ Note: Some skills have the state *unused*. They're not used in the game at seaso
 | 615    | Increase Ignore Def Chance    | unused          |
 | 616    | Recovers SD Fully             | unused          |
 | 617    | Increase Triple Damage Chance | unused          |
-
-

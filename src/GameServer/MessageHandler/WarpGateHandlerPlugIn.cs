@@ -11,6 +11,7 @@ namespace MUnique.OpenMU.GameServer.MessageHandler
     using MUnique.OpenMU.GameLogic;
     using MUnique.OpenMU.GameLogic.PlayerActions;
     using MUnique.OpenMU.Network.Packets.ClientToServer;
+    using MUnique.OpenMU.Network.PlugIns;
     using MUnique.OpenMU.Pathfinding;
     using MUnique.OpenMU.PlugIns;
 
@@ -18,8 +19,9 @@ namespace MUnique.OpenMU.GameServer.MessageHandler
     /// Handler for warp gate packets.
     /// This one is called when a player has entered a gate area, and sends a gate enter request.
     /// </summary>
-    [PlugIn("WarpGateHandlerPlugIn", "Handler for warp gate packets.")]
+    [PlugIn(nameof(WarpGateHandlerPlugIn), "Handler for warp gate packets.")]
     [Guid("d8f56da4-774b-42af-96ac-12a10ea0187b")]
+    [MinimumClient(0, 90, ClientLanguage.Invariant)]
     internal class WarpGateHandlerPlugIn : IPacketHandlerPlugIn
     {
         private readonly WarpGateAction warpAction = new WarpGateAction();

@@ -8,6 +8,7 @@ namespace MUnique.OpenMU.GameServer.RemoteView.World
     using MUnique.OpenMU.GameLogic.Views.World;
     using MUnique.OpenMU.Network;
     using MUnique.OpenMU.Network.Packets.ServerToClient;
+    using MUnique.OpenMU.Network.PlugIns;
     using MUnique.OpenMU.PlugIns;
 
     /// <summary>
@@ -15,6 +16,7 @@ namespace MUnique.OpenMU.GameServer.RemoteView.World
     /// </summary>
     [PlugIn(nameof(TeleportPlugIn), "The default implementation of the ITeleportPlugIn which is forwarding everything to the game client with specific data packets.")]
     [Guid("9506F77B-CA72-4150-87E3-57C889C91F02")]
+    [MinimumClient(0, 90, ClientLanguage.Invariant)]
     public class TeleportPlugIn : ITeleportPlugIn
     {
         private readonly RemotePlayer player;

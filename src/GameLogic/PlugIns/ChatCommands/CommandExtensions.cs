@@ -25,9 +25,10 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
         /// <typeparam name="T">The type.</typeparam>
         /// <returns>Returns the initialized type.</returns>
         public static T ParseArguments<T>(this string command)
+            where T : new()
         {
-            var instance = (T)Activator.CreateInstance(typeof(T))!;
-            var properties = instance.GetType().GetProperties()
+            var instance = new T();
+            var properties = typeof(T).GetProperties()
                 .Where(property => property.SetMethod is { })
                 .ToList();
             var arguments = command.Split(' ').Where(x => !x.Contains("/")).ToList();
@@ -51,7 +52,7 @@ namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands
 
             if (arguments.Count < requiredArgumentCount)
             {
-                throw new ArgumentException($"The command needs {requiredArgumentCount} arguments and was given {arguments.Count}.");
+                throw new ArgumentException($"The command needs {requiredArgumentCount} arguments and was given {arguments.Count}.", nameof(command));
             }
 
             for (var i = 0; i < Math.Min(arguments.Count, properties.Count); i++)

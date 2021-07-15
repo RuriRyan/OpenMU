@@ -24,7 +24,6 @@ namespace MUnique.OpenMU.GameLogic.NPC
     /// </summary>
     public sealed class Monster : NonPlayerCharacter, IAttackable, IAttacker, ISupportWalk, IMovable
     {
-        private const byte MonsterAttackAnimation = 0x78;
         private readonly IDropGenerator dropGenerator;
         private readonly object moveLock = new object();
         private readonly INpcIntelligence intelligence;
@@ -138,10 +137,10 @@ namespace MUnique.OpenMU.GameLogic.NPC
         public void Attack(IAttackable target)
         {
             target.AttackBy(this, null);
-            this.ForEachWorldObserver(p => p.ViewPlugIns.GetPlugIn<IShowAnimationPlugIn>()?.ShowAnimation(this, MonsterAttackAnimation, target, this.GetDirectionTo(target)), true);
+            this.ForEachWorldObserver(p => p.ViewPlugIns.GetPlugIn<IShowAnimationPlugIn>()?.ShowMonsterAttackAnimation(this, target, this.GetDirectionTo(target)), true);
             if (this.Definition.AttackSkill is { } attackSkill)
             {
-                this.ForEachWorldObserver(p => p.ViewPlugIns.GetPlugIn<IShowSkillAnimationPlugIn>()?.ShowSkillAnimation(this, target, attackSkill), true);
+                this.ForEachWorldObserver(p => p.ViewPlugIns.GetPlugIn<IShowSkillAnimationPlugIn>()?.ShowSkillAnimation(this, target, attackSkill, true), true);
             }
         }
 
@@ -237,6 +236,12 @@ namespace MUnique.OpenMU.GameLogic.NPC
             this.Hit(new HitInfo(damage, 0, DamageAttributes.Reflected), reflector, null);
         }
 
+        /// <inheritdoc />
+        public void ApplyPoisonDamage(IAttacker initialAttacker, uint damage)
+        {
+            this.Hit(new HitInfo(damage, 0, DamageAttributes.Poison), initialAttacker, null);
+        }
+
         /// <inheritdoc/>
         public void Move(Point target)
         {
@@ -326,7 +331,7 @@ namespace MUnique.OpenMU.GameLogic.NPC
 
         private void DropItem(int exp, Player killer)
         {
-            var generatedItems = this.dropGenerator.GetItemDrops(this.Definition, exp, killer, out var droppedMoney);
+            var generatedItems = this.dropGenerator.GenerateItemDrops(this.Definition, exp, killer, out var droppedMoney);
             if (droppedMoney > 0)
             {
                 this.HandleMoneyDrop(droppedMoney.Value, killer);

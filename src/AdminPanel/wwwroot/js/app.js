@@ -6,6 +6,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -79,7 +81,8 @@ System.register("Queue", [], function (exports_1, context_1) {
                     this._newestIndex++;
                 };
                 Queue.prototype.dequeue = function () {
-                    var oldestIndex = this._oldestIndex, newestIndex = this._newestIndex;
+                    var oldestIndex = this._oldestIndex;
+                    var newestIndex = this._newestIndex;
                     if (oldestIndex !== newestIndex) {
                         var deletedData = this._storage[oldestIndex];
                         delete this._storage[oldestIndex];
@@ -100,97 +103,10 @@ System.register("Queue", [], function (exports_1, context_1) {
         }
     };
 });
-System.register("Attack", ["three", "tween", "Queue"], function (exports_2, context_2) {
-    "use strict";
-    var THREE, tween_1, Queue_1, Attacks;
-    var __moduleName = context_2 && context_2.id;
-    return {
-        setters: [
-            function (THREE_1) {
-                THREE = THREE_1;
-            },
-            function (tween_1_1) {
-                tween_1 = tween_1_1;
-            },
-            function (Queue_1_1) {
-                Queue_1 = Queue_1_1;
-            }
-        ],
-        execute: function () {
-            Attacks = (function (_super) {
-                __extends(Attacks, _super);
-                function Attacks() {
-                    var _this = this;
-                    var pointsMaterial = new THREE.PointsMaterial({
-                        size: 2,
-                        vertexColors: THREE.VertexColors,
-                        sizeAttenuation: false
-                    });
-                    pointsMaterial.needsUpdate = true;
-                    var colors = [];
-                    var maximumAnimatedPoints = 10000;
-                    var animatedPointsGeometry = new THREE.Geometry();
-                    var queue = new Queue_1.Queue();
-                    for (var i = 0; i < maximumAnimatedPoints; i++) {
-                        animatedPointsGeometry.vertices.push(new THREE.Vector3(0, 0, -100));
-                        var color = new THREE.Color();
-                        color.setHex(0xEE0000);
-                        colors.push(color);
-                        queue.enqueue(i);
-                    }
-                    animatedPointsGeometry.colors = colors;
-                    animatedPointsGeometry.colorsNeedUpdate = true;
-                    animatedPointsGeometry.elementsNeedUpdate = true;
-                    _this = _super.call(this, animatedPointsGeometry, pointsMaterial) || this;
-                    _this.pointLifetimeInMs = 500;
-                    _this.freeAttackIndexes = queue;
-                    _this.geometry = animatedPointsGeometry;
-                    return _this;
-                }
-                Attacks.prototype.update = function () {
-                };
-                Attacks.prototype.addAttack = function (attacker, target) {
-                    var _this = this;
-                    if (this.freeAttackIndexes.peek() === null) {
-                        return;
-                    }
-                    if (target === undefined || target === null) {
-                        return;
-                    }
-                    var newIndex = this.freeAttackIndexes.dequeue();
-                    if (newIndex === null) {
-                        return;
-                    }
-                    this.geometry.colors[newIndex].setHex(0xFF0000 + attacker.data.Id);
-                    this.geometry.colorsNeedUpdate = true;
-                    var vertice = this.geometry.vertices[newIndex];
-                    vertice.set(attacker.position.x, attacker.position.y, 0);
-                    var state = { x: vertice.x, y: vertice.y };
-                    var tween = new tween_1.default.Tween(state)
-                        .to({ x: target.position.x, y: target.position.y }, this.pointLifetimeInMs)
-                        .onUpdate(function () {
-                        vertice.set(state.x, state.y, 0);
-                        _this.geometry.verticesNeedUpdate = true;
-                    })
-                        .onComplete(function () {
-                        vertice.z = -100;
-                        _this.geometry.verticesNeedUpdate = true;
-                        _this.freeAttackIndexes.enqueue(newIndex);
-                    })
-                        .start();
-                    this.geometry.verticesNeedUpdate = true;
-                };
-                return Attacks;
-            }(THREE.Points));
-            exports_2("Attacks", Attacks);
-            ;
-        }
-    };
-});
-System.register("Types", [], function (exports_3, context_3) {
+System.register("Types", [], function (exports_2, context_2) {
     "use strict";
     var Direction;
-    var __moduleName = context_3 && context_3.id;
+    var __moduleName = context_2 && context_2.id;
     return {
         setters: [],
         execute: function () {
@@ -205,21 +121,21 @@ System.register("Types", [], function (exports_3, context_3) {
                 Direction[Direction["North"] = 7] = "North";
                 Direction[Direction["NorthWest"] = 8] = "NorthWest";
             })(Direction || (Direction = {}));
-            exports_3("Direction", Direction);
+            exports_2("Direction", Direction);
         }
     };
 });
-System.register("Attackable", ["three", "tween"], function (exports_4, context_4) {
+System.register("Attackable", ["three", "tween"], function (exports_3, context_3) {
     "use strict";
-    var THREE, tween_2, Attackable, attackableAlphaMapTexture;
-    var __moduleName = context_4 && context_4.id;
+    var THREE, tween_1, Attackable, attackableAlphaMapTexture;
+    var __moduleName = context_3 && context_3.id;
     return {
         setters: [
-            function (THREE_2) {
-                THREE = THREE_2;
+            function (THREE_1) {
+                THREE = THREE_1;
             },
-            function (tween_2_1) {
-                tween_2 = tween_2_1;
+            function (tween_1_1) {
+                tween_1 = tween_1_1;
             }
         ],
         execute: function () {
@@ -233,11 +149,14 @@ System.register("Attackable", ["three", "tween"], function (exports_4, context_4
                 }
                 Attackable.prototype.gotKilled = function () {
                     var _this = this;
-                    var state = { opacity: 1 };
-                    var tween = new tween_2.default.Tween(state)
-                        .to({ opacity: 0.1 }, 1000)
+                    var fadeOutDurationMs = 1000;
+                    var startingOpacity = 1;
+                    var fadedOutOpacity = 0.1;
+                    var state = { opacity: startingOpacity };
+                    var tween = new tween_1.default.Tween(state)
+                        .to({ opacity: fadedOutOpacity }, fadeOutDurationMs)
                         .onUpdate(function () { return _this.material.opacity = state.opacity; })
-                        .easing(tween_2.default.Easing.Circular.Out)
+                        .easing(tween_1.default.Easing.Circular.Out)
                         .start();
                 };
                 Attackable.prototype.respawn = function (newData) {
@@ -245,10 +164,10 @@ System.register("Attackable", ["three", "tween"], function (exports_4, context_4
                     this.data = newData;
                     this.material.opacity = 1.0;
                     var state = { scale: 0 };
-                    var tween = new tween_2.default.Tween(state)
+                    var tween = new tween_1.default.Tween(state)
                         .to({ scale: 1 }, 500)
                         .onUpdate(function () { return _this.scale.setScalar(state.scale); })
-                        .easing(tween_2.default.Easing.Back.Out)
+                        .easing(tween_1.default.Easing.Back.Out)
                         .start();
                     this.setObjectPositionOnMap(this.data.x, this.data.y);
                     this.setRotation(this.data.direction);
@@ -260,17 +179,18 @@ System.register("Attackable", ["three", "tween"], function (exports_4, context_4
                     if (this.moveTween !== null) {
                         this.moveTween.stop();
                     }
-                    this.moveTween = new tween_2.default.Tween(state)
+                    this.moveTween = new tween_1.default.Tween(state)
                         .onUpdate(function () { return _this.setObjectPositionOnMap(state.x, state.y); });
                     if (moveType === "Instant" || moveType === 1) {
-                        this.moveTween = this.moveTween.easing(tween_2.default.Easing.Elastic.Out)
-                            .to({ x: newX, y: newY }, 300);
+                        var moveDurationMs = 300;
+                        this.moveTween = this.moveTween.easing(tween_1.default.Easing.Elastic.Out)
+                            .to({ x: newX, y: newY }, moveDurationMs);
                     }
                     else {
                         var _loop_1 = function (i) {
                             if (steps.hasOwnProperty(i)) {
                                 var step_1 = steps[i];
-                                var stepTween = new tween_2.default.Tween(state)
+                                var stepTween = new tween_1.default.Tween(state)
                                     .to({ x: step_1.x, y: step_1.y }, walkDelay)
                                     .onStart(function () { return _this.rotateTo(step_1.direction); })
                                     .onUpdate(function () { return _this.setObjectPositionOnMap(state.x, state.y); });
@@ -291,7 +211,9 @@ System.register("Attackable", ["three", "tween"], function (exports_4, context_4
                     this.setRotation(rotation);
                 };
                 Attackable.prototype.setRotation = function (value) {
-                    this.rotation.z = THREE.Math.degToRad((value * 360) / 8);
+                    var degreesOfOneTurn = 360;
+                    var numberOfDirectionValues = 8;
+                    this.rotation.z = THREE.Math.degToRad((value * degreesOfOneTurn) / numberOfDirectionValues);
                 };
                 Attackable.prototype.setObjectPositionOnMap = function (newX, newY) {
                     var offset = 128;
@@ -300,17 +222,107 @@ System.register("Attackable", ["three", "tween"], function (exports_4, context_4
                 };
                 return Attackable;
             }(THREE.Mesh));
-            exports_4("Attackable", Attackable);
+            exports_3("Attackable", Attackable);
             ;
             new THREE.TextureLoader().load('/img/attackable_alphamap.png', function (t) {
-                exports_4("attackableAlphaMapTexture", attackableAlphaMapTexture = t);
+                exports_3("attackableAlphaMapTexture", attackableAlphaMapTexture = t);
             });
         }
     };
 });
-System.register("WorldObjectPicker", ["three"], function (exports_5, context_5) {
+System.register("Attack", ["three", "tween", "Queue"], function (exports_4, context_4) {
     "use strict";
-    var THREE, WorldObjectPicker;
+    var THREE, tween_2, Queue_1, Attacks;
+    var __moduleName = context_4 && context_4.id;
+    return {
+        setters: [
+            function (THREE_2) {
+                THREE = THREE_2;
+            },
+            function (tween_2_1) {
+                tween_2 = tween_2_1;
+            },
+            function (Queue_1_1) {
+                Queue_1 = Queue_1_1;
+            }
+        ],
+        execute: function () {
+            Attacks = (function (_super) {
+                __extends(Attacks, _super);
+                function Attacks() {
+                    var _this = this;
+                    var pointsMaterial = new THREE.PointsMaterial({
+                        size: 2,
+                        sizeAttenuation: false,
+                        vertexColors: THREE.VertexColors,
+                    });
+                    pointsMaterial.needsUpdate = true;
+                    var colors = [];
+                    var maximumAnimatedPoints = 10000;
+                    var animatedPointsGeometry = new THREE.Geometry();
+                    var queue = new Queue_1.Queue();
+                    for (var i = 0; i < maximumAnimatedPoints; i++) {
+                        animatedPointsGeometry.vertices.push(new THREE.Vector3(0, 0, -Infinity));
+                        var color = new THREE.Color();
+                        color.setHex(0xEE0000);
+                        colors.push(color);
+                        queue.enqueue(i);
+                    }
+                    animatedPointsGeometry.colors = colors;
+                    animatedPointsGeometry.colorsNeedUpdate = true;
+                    animatedPointsGeometry.elementsNeedUpdate = true;
+                    _this = _super.call(this, animatedPointsGeometry, pointsMaterial) || this;
+                    _this.pointLifetimeInMs = Attacks.defaultPointsLifetimeMs;
+                    _this.freeAttackIndexes = queue;
+                    _this.geometry = animatedPointsGeometry;
+                    return _this;
+                }
+                Attacks.prototype.update = function () {
+                };
+                Attacks.prototype.addAttack = function (attacker, target) {
+                    var _this = this;
+                    if (this.freeAttackIndexes.peek() === null) {
+                        return;
+                    }
+                    if (target === undefined || target === null) {
+                        return;
+                    }
+                    var newIndex = this.freeAttackIndexes.dequeue();
+                    if (newIndex === null) {
+                        return;
+                    }
+                    this.geometry.colors[newIndex].setHex(0xFF0000 + attacker.data.id);
+                    this.geometry.colorsNeedUpdate = true;
+                    var visibleZ = 0;
+                    var invisibleZ = -Infinity;
+                    var vertice = this.geometry.vertices[newIndex];
+                    vertice.set(attacker.position.x, attacker.position.y, visibleZ);
+                    var state = { x: vertice.x, y: vertice.y };
+                    var tween = new tween_2.default.Tween(state)
+                        .to({ x: target.position.x, y: target.position.y }, this.pointLifetimeInMs)
+                        .onUpdate(function () {
+                        vertice.set(state.x, state.y, visibleZ);
+                        _this.geometry.verticesNeedUpdate = true;
+                    })
+                        .onComplete(function () {
+                        vertice.z = invisibleZ;
+                        _this.geometry.verticesNeedUpdate = true;
+                        _this.freeAttackIndexes.enqueue(newIndex);
+                    })
+                        .start();
+                    this.geometry.verticesNeedUpdate = true;
+                };
+                Attacks.defaultPointsLifetimeMs = 500;
+                return Attacks;
+            }(THREE.Points));
+            exports_4("Attacks", Attacks);
+            ;
+        }
+    };
+});
+System.register("TerrainShader", ["three"], function (exports_5, context_5) {
+    "use strict";
+    var THREE, terrainShader;
     var __moduleName = context_5 && context_5.id;
     return {
         setters: [
@@ -319,61 +331,7 @@ System.register("WorldObjectPicker", ["three"], function (exports_5, context_5) 
             }
         ],
         execute: function () {
-            WorldObjectPicker = (function () {
-                function WorldObjectPicker(worldCanvas, worldMesh, camera, onObjectPicked) {
-                    var _this = this;
-                    var raycaster = new THREE.Raycaster();
-                    var mouse = new THREE.Vector2();
-                    raycaster.setFromCamera(mouse, camera);
-                    worldCanvas.addEventListener('click', function (mouseEvent) {
-                        mouse.x = (mouseEvent.offsetX / worldCanvas.clientWidth) * 2 - 1;
-                        mouse.y = -(mouseEvent.offsetY / worldCanvas.clientHeight) * 2 + 1;
-                        raycaster.setFromCamera(mouse, camera);
-                        var intersects = raycaster.intersectObjects(worldMesh.children, true);
-                        if (intersects.length > 0 && onObjectPicked) {
-                            var data = _this.extractObjectData(intersects[0]);
-                            onObjectPicked(data);
-                        }
-                    }, false);
-                }
-                WorldObjectPicker.prototype.extractObjectData = function (intersection) {
-                    var attackable = intersection.object;
-                    if (attackable != null) {
-                        return attackable.data;
-                    }
-                    return null;
-                };
-                return WorldObjectPicker;
-            }());
-            exports_5("WorldObjectPicker", WorldObjectPicker);
-            ;
-        }
-    };
-});
-System.register("TerrainShader", ["three"], function (exports_6, context_6) {
-    "use strict";
-    var THREE, terrainShader;
-    var __moduleName = context_6 && context_6.id;
-    return {
-        setters: [
-            function (THREE_4) {
-                THREE = THREE_4;
-            }
-        ],
-        execute: function () {
-            exports_6("terrainShader", terrainShader = {
-                uniforms: {
-                    tColor: { type: "t", value: 0 },
-                    tPixelSize: { type: "f", value: 0.3 }
-                },
-                side: THREE.DoubleSide,
-                vertexShader: [
-                    "varying vec2 vUv;",
-                    "void main() {",
-                    "vUv = vec2(uv.x, uv.y);",
-                    "gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
-                    "}"
-                ].join("\n"),
+            exports_5("terrainShader", terrainShader = {
                 fragmentShader: [
                     "uniform sampler2D tColor;",
                     "uniform float tPixelSize;",
@@ -390,19 +348,31 @@ System.register("TerrainShader", ["three"], function (exports_6, context_6) {
                     "}",
                     "gl_FragColor = texel * multi;",
                     "}"
-                ].join("\n")
+                ].join("\n"),
+                side: THREE.DoubleSide,
+                uniforms: {
+                    tColor: { type: "t", value: 0 },
+                    tPixelSize: { type: "f", value: 0.3 },
+                },
+                vertexShader: [
+                    "varying vec2 vUv;",
+                    "void main() {",
+                    "vUv = vec2(uv.x, uv.y);",
+                    "gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+                    "}"
+                ].join("\n"),
             });
         }
     };
 });
-System.register("Player", ["three", "Attackable"], function (exports_7, context_7) {
+System.register("Player", ["three", "Attackable"], function (exports_6, context_6) {
     "use strict";
     var THREE, Attackable_1, Player;
-    var __moduleName = context_7 && context_7.id;
+    var __moduleName = context_6 && context_6.id;
     return {
         setters: [
-            function (THREE_5) {
-                THREE = THREE_5;
+            function (THREE_4) {
+                THREE = THREE_4;
             },
             function (Attackable_1_1) {
                 Attackable_1 = Attackable_1_1;
@@ -412,32 +382,39 @@ System.register("Player", ["three", "Attackable"], function (exports_7, context_
             Player = (function (_super) {
                 __extends(Player, _super);
                 function Player(data) {
-                    return _super.call(this, data, Player.defaultGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000 + data.id, alphaMap: Attackable_1.attackableAlphaMapTexture, transparent: true })) || this;
+                    return _super.call(this, data, Player.defaultGeometry, new THREE.MeshBasicMaterial({
+                        alphaMap: Attackable_1.attackableAlphaMapTexture,
+                        color: 0xFF0000 + data.id,
+                        transparent: true,
+                    })) || this;
                 }
                 Player.prototype.update = function () {
+                    var highlightedScale = 1.5;
+                    var normalScale = 1.0;
                     if (this.data.isHighlighted) {
-                        this.scale.setScalar(1.5);
+                        this.scale.setScalar(highlightedScale);
                     }
                     else {
-                        this.scale.setScalar(1.0);
+                        this.scale.setScalar(normalScale);
                     }
                 };
-                Player.defaultGeometry = new THREE.BoxGeometry(4, 4, 4);
+                Player.size = 4;
+                Player.defaultGeometry = new THREE.BoxGeometry(Player.size, Player.size, Player.size);
                 return Player;
             }(Attackable_1.Attackable));
-            exports_7("Player", Player);
+            exports_6("Player", Player);
             ;
         }
     };
 });
-System.register("NonPlayerCharacter", ["three", "Attackable"], function (exports_8, context_8) {
+System.register("NonPlayerCharacter", ["three", "Attackable"], function (exports_7, context_7) {
     "use strict";
     var THREE, Attackable_2, NonPlayerCharacter;
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_7 && context_7.id;
     return {
         setters: [
-            function (THREE_6) {
-                THREE = THREE_6;
+            function (THREE_5) {
+                THREE = THREE_5;
             },
             function (Attackable_2_1) {
                 Attackable_2 = Attackable_2_1;
@@ -449,22 +426,23 @@ System.register("NonPlayerCharacter", ["three", "Attackable"], function (exports
                 function NonPlayerCharacter(data) {
                     return _super.call(this, data, NonPlayerCharacter.defaultGeometry, new THREE.MeshBasicMaterial({ color: 0x00FFFF, alphaMap: Attackable_2.attackableAlphaMapTexture, transparent: true })) || this;
                 }
-                NonPlayerCharacter.defaultGeometry = new THREE.BoxGeometry(4, 4, 4);
+                NonPlayerCharacter.size = 4;
+                NonPlayerCharacter.defaultGeometry = new THREE.BoxGeometry(NonPlayerCharacter.size, NonPlayerCharacter.size, NonPlayerCharacter.size);
                 return NonPlayerCharacter;
             }(Attackable_2.Attackable));
-            exports_8("NonPlayerCharacter", NonPlayerCharacter);
+            exports_7("NonPlayerCharacter", NonPlayerCharacter);
             ;
         }
     };
 });
-System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attackable", "NonPlayerCharacter"], function (exports_9, context_9) {
+System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attackable", "NonPlayerCharacter"], function (exports_8, context_8) {
     "use strict";
     var THREE, Attack_1, TerrainShader_1, Player_1, Attackable_3, NonPlayerCharacter_1, World;
-    var __moduleName = context_9 && context_9.id;
+    var __moduleName = context_8 && context_8.id;
     return {
         setters: [
-            function (THREE_7) {
-                THREE = THREE_7;
+            function (THREE_6) {
+                THREE = THREE_6;
             },
             function (Attack_1_1) {
                 Attack_1 = Attack_1_1;
@@ -488,10 +466,13 @@ System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attacka
                 function World(serverId, mapId) {
                     var _this = _super.call(this) || this;
                     _this.objects = {};
+                    var attacksZ = 100;
                     _this.attacks = new Attack_1.Attacks();
-                    _this.attacks.position.z = 100;
+                    _this.attacks.position.z = attacksZ;
                     _this.add(_this.attacks);
-                    var planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(256, 256, 1, 1), new THREE.ShaderMaterial(TerrainShader_1.terrainShader));
+                    var sideLength = 256;
+                    var segments = 1;
+                    var planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(sideLength, sideLength, segments, segments), new THREE.ShaderMaterial(TerrainShader_1.terrainShader));
                     _this.add(planeMesh);
                     var textureLoader = new THREE.TextureLoader();
                     textureLoader.load('terrain/' + serverId + '/' + mapId, function (texture) {
@@ -514,16 +495,17 @@ System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attacka
                 };
                 World.prototype.addOrUpdateNpc = function (npcData) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var obj;
+                        var obj, waitTimeMs_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     obj = this.getObjectById(npcData.id);
                                     if (!(obj === undefined || obj === null)) return [3, 4];
+                                    waitTimeMs_1 = 50;
                                     _a.label = 1;
                                 case 1:
                                     if (!(Attackable_3.attackableAlphaMapTexture === undefined)) return [3, 3];
-                                    return [4, new Promise(function (resolve) { return setTimeout(resolve, 50); })];
+                                    return [4, new Promise(function (resolve) { return setTimeout(resolve, waitTimeMs_1); })];
                                 case 2:
                                     _a.sent();
                                     return [3, 1];
@@ -542,16 +524,17 @@ System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attacka
                 };
                 World.prototype.addOrUpdatePlayer = function (playerData) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var obj;
+                        var obj, waitTimeMs_2;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     obj = this.getObjectById(playerData.id);
                                     if (!(obj === undefined || obj === null)) return [3, 4];
+                                    waitTimeMs_2 = 50;
                                     _a.label = 1;
                                 case 1:
                                     if (!(Attackable_3.attackableAlphaMapTexture === undefined)) return [3, 3];
-                                    return [4, new Promise(function (resolve) { return setTimeout(resolve, 50); })];
+                                    return [4, new Promise(function (resolve) { return setTimeout(resolve, waitTimeMs_2); })];
                                 case 2:
                                     _a.sent();
                                     return [3, 1];
@@ -590,7 +573,8 @@ System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attacka
                 World.prototype.addAnimation = function (animatingId, animation, targetId, direction) {
                     var animating = this.getObjectById(animatingId);
                     if (animating !== undefined && animating !== null) {
-                        animating.rotateTo(direction / 0x10);
+                        var rotationMultiplier = 0x10;
+                        animating.rotateTo(direction / rotationMultiplier);
                     }
                     if (targetId !== null) {
                         var target = this.getObjectById(targetId);
@@ -640,7 +624,49 @@ System.register("World", ["three", "Attack", "TerrainShader", "Player", "Attacka
                 };
                 return World;
             }(THREE.Object3D));
-            exports_9("World", World);
+            exports_8("World", World);
+            ;
+        }
+    };
+});
+System.register("WorldObjectPicker", ["three"], function (exports_9, context_9) {
+    "use strict";
+    var THREE, WorldObjectPicker;
+    var __moduleName = context_9 && context_9.id;
+    return {
+        setters: [
+            function (THREE_7) {
+                THREE = THREE_7;
+            }
+        ],
+        execute: function () {
+            WorldObjectPicker = (function () {
+                function WorldObjectPicker(worldCanvas, worldMesh, camera, onObjectPicked) {
+                    var _this = this;
+                    var raycaster = new THREE.Raycaster();
+                    var mouse = new THREE.Vector2();
+                    raycaster.setFromCamera(mouse, camera);
+                    worldCanvas.addEventListener('click', function (mouseEvent) {
+                        mouse.x = (mouseEvent.offsetX / worldCanvas.clientWidth) * 2 - 1;
+                        mouse.y = -(mouseEvent.offsetY / worldCanvas.clientHeight) * 2 + 1;
+                        raycaster.setFromCamera(mouse, camera);
+                        var intersects = raycaster.intersectObjects(worldMesh.children, true);
+                        if (intersects.length > 0 && onObjectPicked) {
+                            var data = _this.extractObjectData(intersects[0]);
+                            onObjectPicked(data);
+                        }
+                    }, false);
+                }
+                WorldObjectPicker.prototype.extractObjectData = function (intersection) {
+                    var attackable = intersection.object;
+                    if (attackable != null) {
+                        return attackable.data;
+                    }
+                    return null;
+                };
+                return WorldObjectPicker;
+            }());
+            exports_9("WorldObjectPicker", WorldObjectPicker);
             ;
         }
     };
@@ -721,8 +747,9 @@ System.register("MapApp", ["three", "tween", "WorldObjectPicker", "World"], func
                     return camera;
                 };
                 MapApp.prototype.onWindowResize = function () {
-                    var preferredWidth = window.innerWidth - this.container.offsetLeft - 50;
-                    var preferredHeigth = window.innerHeight - this.container.offsetTop - 50;
+                    var margin = 50;
+                    var preferredWidth = window.innerWidth - this.container.offsetLeft - margin;
+                    var preferredHeigth = window.innerHeight - this.container.offsetTop - margin;
                     var newSize = Math.min(preferredWidth, preferredHeigth);
                     this.renderer.setSize(newSize, newSize);
                     this.world.onSizeChanged(newSize);

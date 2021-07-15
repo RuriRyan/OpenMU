@@ -350,6 +350,26 @@ namespace MUnique.OpenMU.GameLogic.Attributes
         public static AttributeDefinition IsShieldEquipped { get; } = new AttributeDefinition(new Guid("394DFAA0-B18D-44DA-A99D-094BC5E7C9C5"), "Is Shield Equipped", string.Empty);
 
         /// <summary>
+        /// Gets the attribute definition, which defines if a player has ice effect applied.
+        /// </summary>
+        public static AttributeDefinition IsIced { get; } = new (new Guid("4A0266F4-B15F-48D7-A9BB-7DCB657124D0"), "Is iced", "The player can only move slowly");
+
+        /// <summary>
+        /// Gets the attribute definition, which defines if a player has frozen effect applied.
+        /// </summary>
+        public static AttributeDefinition IsFrozen { get; } = new (new Guid("18B8933A-28C3-4B79-9350-FFE5F648B754"), "Is frozen", "The player can't move because he is frozen (ice arrow).");
+
+        /// <summary>
+        /// Gets the attribute definition, which defines if a player has poison effect applied.
+        /// </summary>
+        public static AttributeDefinition IsPoisoned { get; } = new (new Guid("F8970D12-069B-4A18-8E18-A9296B85B4ED"), "Is poisoned", "The player is poisoned and loses health");
+
+        /// <summary>
+        /// Gets the attribute definition, which defines if a player has stun effect applied.
+        /// </summary>
+        public static AttributeDefinition IsStunned { get; } = new (new Guid("22C86BAF-7F27-478D-8075-E4465C2859DD"), "Is stunned", "The player is poisoned and loses health");
+
+        /// <summary>
         /// Gets the ice resistance attribute definition.
         /// </summary>
         public static AttributeDefinition IceResistance { get; } = new AttributeDefinition(new Guid("47235C36-41BB-44B4-8823-6FC415709F59"), "Ice Resistance", string.Empty);
@@ -408,6 +428,11 @@ namespace MUnique.OpenMU.GameLogic.Attributes
         /// Gets the shield recovery attribute definition.
         /// </summary>
         public static AttributeDefinition ShieldRecoveryMultiplier { get; } = new AttributeDefinition(new Guid("6B99AA99-C1A3-413B-8C70-602567EB5163"), "Shield Recovery Multiplier", string.Empty);
+
+        /// <summary>
+        /// Gets the poison damage multiplier attribute definition.
+        /// </summary>
+        public static AttributeDefinition PoisonDamageMultiplier { get; } = new AttributeDefinition(new Guid("8581CD4D-C6AE-4C35-9147-9642DE7CC013"), "Poison Damage Multiplier", string.Empty);
 
         /// <summary>
         /// Gets the mana recovery absolute attribute definition.
@@ -543,7 +568,7 @@ namespace MUnique.OpenMU.GameLogic.Attributes
         /// <summary>
         /// Gets the fully recover health after hit chance definition.
         /// </summary>
-        public static AttributeDefinition FullyRecoverHealthAfterHitChance { get; } = new AttributeDefinition(new Guid("3CA72C07-9C2C-4FC5-8BCB-9BD737F83664"), "Chance to fully recover mana when getting hit", "3rd Wing Option");
+        public static AttributeDefinition FullyRecoverHealthAfterHitChance { get; } = new AttributeDefinition(new Guid("3CA72C07-9C2C-4FC5-8BCB-9BD737F83664"), "Chance to fully recover health when getting hit", "3rd Wing Option");
 
         /// <summary>
         /// Gets the health loss after hit definition.

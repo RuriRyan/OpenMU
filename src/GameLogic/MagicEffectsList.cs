@@ -35,6 +35,11 @@ namespace MUnique.OpenMU.GameLogic
         public IDictionary<short, MagicEffect> ActiveEffects { get; }
 
         /// <summary>
+        /// Gets the active visible effect ids.
+        /// </summary>
+        public IList<MagicEffect> VisibleEffects => this.ActiveEffects.Values.Where(me => me.Definition.InformObservers).ToList();
+
+        /// <summary>
         /// Adds the effect and applies the power ups.
         /// </summary>
         /// <param name="effect">The effect.</param>
@@ -68,15 +73,10 @@ namespace MUnique.OpenMU.GameLogic
                     (this.owner as IObservable)?.ForEachObservingPlayer(p => p.ViewPlugIns.GetPlugIn<IActivateMagicEffectPlugIn>()?.ActivateMagicEffect(effect, this.owner), false);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the active visible effect ids.
-        /// </summary>
-        /// <returns>An array of active effect ids.</returns>
-        public IList<MagicEffect> GetVisibleEffects()
-        {
-            return this.ActiveEffects.Values.Where(me => me.Definition.InformObservers).ToList();
+            else
+            {
+                effect.Dispose();
+            }
         }
 
         /// <summary>
