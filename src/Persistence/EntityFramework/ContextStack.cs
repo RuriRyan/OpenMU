@@ -15,7 +15,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework
     {
         private readonly IDictionary<Thread, Stack<IContext>> contextsPerThread = new Dictionary<Thread, Stack<IContext>>();
 
-        private readonly ReaderWriterLockSlim contextLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim contextLock = new ();
 
         /// <summary>
         /// Field to detect redundant calls.
@@ -84,7 +84,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework
                 this.contextLock.ExitReadLock();
             }
 
-            if (contextsOfCurrentThread != null && contextsOfCurrentThread.Count > 0)
+            if (contextsOfCurrentThread is { Count: > 0 })
             {
                 return contextsOfCurrentThread.Peek();
             }

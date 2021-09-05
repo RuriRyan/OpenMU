@@ -210,31 +210,28 @@ namespace MUnique.OpenMU.GameLogic
             }
 
             var resistance = target.Attributes[modifier];
-            if (resistance >= 1.0f)
+            if (resistance >= 1.0f || !Rand.NextRandomBool(1.0f - resistance))
             {
                return false;
             }
 
-            if (target.MagicEffectList.ActiveEffects.ContainsKey(skillEntry.Skill.MagicEffectDef!.Number))
-            {
-                return false;
-            }
+            var applied = false;
 
-            if (Rand.NextRandomBool(1.0f - resistance))
+            if (skillEntry.Skill.MagicEffectDef is { } effectDefinition
+                && !target.MagicEffectList.ActiveEffects.ContainsKey(effectDefinition.Number))
             {
                 // power-up is the wrong term here... it's more like a power-down ;-)
-                if (skillEntry.Skill.MagicEffectDef != null)
-                {
-                    target.ApplyMagicEffect(player, skillEntry);
-                }
-
-                if (modifier == Stats.LightningResistance)
-                {
-                    target.MoveRandomly();
-                }
+                target.ApplyMagicEffect(player, skillEntry);
+                applied = true;
             }
 
-            return true;
+            if (modifier == Stats.LightningResistance)
+            {
+                target.MoveRandomly();
+                applied = true;
+            }
+
+            return applied;
         }
 
         /// <summary>
@@ -298,8 +295,8 @@ namespace MUnique.OpenMU.GameLogic
                 var terrain = map.Terrain;
                 var newX = target.Position.X + Rand.NextInt(-1, 2);
                 var newY = target.Position.Y + Rand.NextInt(-1, 2);
-                var isNewXAllowed = newX >= byte.MinValue && newX <= byte.MaxValue;
-                var isNewYAllowed = newY >= byte.MinValue && newY <= byte.MaxValue;
+                var isNewXAllowed = newX is >= byte.MinValue and <= byte.MaxValue;
+                var isNewYAllowed = newY is >= byte.MinValue and <= byte.MaxValue;
                 if (isNewXAllowed && isNewYAllowed && terrain.AIgrid[newX, newY] == 1)
                 {
                     movable.Move(new Point((byte)newX, (byte)newY));

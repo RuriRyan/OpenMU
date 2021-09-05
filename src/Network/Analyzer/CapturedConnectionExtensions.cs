@@ -7,6 +7,7 @@ namespace MUnique.OpenMU.Network.Analyzer
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
 
     /// <summary>
@@ -26,9 +27,8 @@ namespace MUnique.OpenMU.Network.Analyzer
             using var file = File.OpenWrite(path);
             using var writer = new StreamWriter(file);
             writer.WriteLine(connection.StartTimestamp);
-            for (var i = 0; i < connection.PacketList.Count; i++)
+            foreach (var packet in connection.PacketList)
             {
-                var packet = connection.PacketList[i];
                 writer.Write(packet.Timestamp.Ticks);
                 writer.Write(fieldSeparator);
                 writer.Write(packet.ToServer);
@@ -55,8 +55,7 @@ namespace MUnique.OpenMU.Network.Analyzer
             {
                 var currentLine = reader.ReadLine();
                 var splittedLine = currentLine?.Split(fieldSeparator);
-                if (splittedLine != null
-                    && splittedLine.Length > 3
+                if (splittedLine is { Length: > 3 }
                     && long.TryParse(splittedLine[0], out var ticks)
                     && bool.TryParse(splittedLine[1], out var toServer)
                     && int.TryParse(splittedLine[2], out var size)
@@ -97,7 +96,7 @@ namespace MUnique.OpenMU.Network.Analyzer
 
             for (int i = 0; i < bytesAsString.Length; i++)
             {
-                data[i] = byte.Parse(bytesAsString[i], System.Globalization.NumberStyles.HexNumber);
+                data[i] = byte.Parse(bytesAsString[i], System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             }
 
             return true;

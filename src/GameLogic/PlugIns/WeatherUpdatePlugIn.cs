@@ -18,13 +18,13 @@ namespace MUnique.OpenMU.GameLogic.PlugIns
     [Guid("3E702A15-653A-48EF-899C-4CDB2239A90C")]
     public class WeatherUpdatePlugIn : IPeriodicTaskPlugIn, IObjectAddedToMapPlugIn
     {
-        private readonly Random random = new Random();
+        private readonly Random random = new ();
 
         private readonly IDictionary<GameMap, (byte, byte)> weatherStates = new Dictionary<GameMap, (byte, byte)>();
 
         private DateTime nextRunUtc = DateTime.UtcNow;
 
-        private bool isRunning = false;
+        private bool isRunning;
 
         /// <inheritdoc />
         public void ExecuteTask(GameContext gameContext)

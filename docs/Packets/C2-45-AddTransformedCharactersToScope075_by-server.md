@@ -20,7 +20,7 @@ The character appears as monster, defined by the Skin property.
 
 ### CharacterData Structure
 
-Contains the data of an character.
+Contains the data of an transformed character.
 
 Length: 19 Bytes
 

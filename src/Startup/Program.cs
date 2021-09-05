@@ -54,34 +54,6 @@ namespace MUnique.OpenMU.Startup
         private IHost? serverHost;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Program"/> class.
-        /// </summary>
-        /// <param name="args">The command line args.</param>
-        public async Task Initialize(string[] args)
-        {
-            Log.Info("Creating host...");
-            this.serverHost = await this.CreateHost(args).ConfigureAwait(false);
-
-            if (args.Contains("-autostart") || !this.IsAdminPanelEnabled(args))
-            {
-                foreach (var chatServer in this.servers.OfType<ChatServer>())
-                {
-                    chatServer.Start();
-                }
-
-                foreach (var gameServer in this.gameServers.Values)
-                {
-                    gameServer.Start();
-                }
-
-                foreach (var connectServer in this.servers.OfType<IConnectServer>())
-                {
-                    connectServer.Start();
-                }
-            }
-        }
-
-        /// <summary>
         /// The main method.
         /// </summary>
         /// <param name="args">The command line args.</param>
@@ -131,6 +103,34 @@ namespace MUnique.OpenMU.Startup
                 }
 
                 await HandleConsoleInputAsync(exitCts, exitToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Program"/> class.
+        /// </summary>
+        /// <param name="args">The command line args.</param>
+        public async Task Initialize(string[] args)
+        {
+            Log.Info("Creating host...");
+            this.serverHost = await this.CreateHost(args).ConfigureAwait(false);
+
+            if (args.Contains("-autostart") || !this.IsAdminPanelEnabled(args))
+            {
+                foreach (var chatServer in this.servers.OfType<ChatServer>())
+                {
+                    chatServer.Start();
+                }
+
+                foreach (var gameServer in this.gameServers.Values)
+                {
+                    gameServer.Start();
+                }
+
+                foreach (var connectServer in this.servers.OfType<IConnectServer>())
+                {
+                    connectServer.Start();
+                }
             }
         }
 
@@ -270,8 +270,7 @@ namespace MUnique.OpenMU.Startup
             var parameter = args.FirstOrDefault(a => a.StartsWith($"-{parameterName}:", StringComparison.InvariantCultureIgnoreCase));
             if (parameter != null
                 && int.TryParse(parameter.Substring(parameter.IndexOf(':') + 1), out int value)
-                && value >= 0
-                && value <= ushort.MaxValue)
+                && value is >= 0 and <= ushort.MaxValue)
             {
                 return (ushort)value;
             }

@@ -29,14 +29,13 @@ namespace MUnique.OpenMU.GameLogic.NPC
                 return;
             }
 
-            var isTrapActivated = this.GetAllTargets()
-                .Any(player => player.Position == this.Trap.Position);
+            var isTrapActivated = this.PossibleTargets.Any(player => player.Position == this.Trap.Position);
             if (!isTrapActivated)
             {
                 return;
             }
 
-            var targetsInRange = this.GetAllTargets()
+            var targetsInRange = this.PossibleTargets
                 .Where(target => this.Trap.IsInRange(target.Position, this.Trap.Definition.AttackRange))
                 .Where(target => !this.Map.Terrain.SafezoneMap[target.Position.X, target.Position.Y]);
 

@@ -134,6 +134,26 @@ namespace MUnique.OpenMU.Network.Analyzer
                 return exactMatch.Definition;
             }
 
+            var sameLengthPackets = filteredDefinitions.Where(d => d.Definition.Length == packet.Size).Select(d => d.Definition).ToList();
+            if (sameLengthPackets.Count > 0)
+            {
+                if (sameLengthPackets.Count == 1 && sameLengthPackets.First() is { Name: { } } sameLengthMatch)
+                {
+                    return sameLengthMatch;
+                }
+
+                var filteredByDefaults = this.GetPacketDefinitionsFilteredByDefaultValues(packet, sameLengthPackets, allDefinitions).ToList();
+                if (filteredByDefaults.Count == 1)
+                {
+                    return filteredByDefaults.First();
+                }
+
+                if (filteredByDefaults.Count > 0)
+                {
+                    filteredDefinitions.RemoveAll(def => !filteredByDefaults.Contains(def.Definition));
+                }
+            }
+
             var current = filteredDefinitions.First();
             foreach (var def in filteredDefinitions.Skip(1))
             {
@@ -146,6 +166,25 @@ namespace MUnique.OpenMU.Network.Analyzer
             }
 
             return current.Definition;
+        }
+
+        private IEnumerable<PacketDefinition> GetPacketDefinitionsFilteredByDefaultValues(Packet packet, IEnumerable<PacketDefinition> definitions, PacketDefinitions allDefinitions)
+        {
+            foreach (var def in definitions)
+            {
+                var defaultFields = def.Fields?.TakeWhile(f => !string.IsNullOrWhiteSpace(f.DefaultValue)).ToList();
+                if (defaultFields is null or { Count: 0 })
+                {
+                    break;
+                }
+
+                if (defaultFields.TrueForAll(field => int.TryParse(this.ExtractFieldValueOrGetError(packet.Data, field, def, allDefinitions), out var actual)
+                                                      && (int.TryParse(field.DefaultValue, out var target) || int.TryParse(field.DefaultValue!.Replace("0x", string.Empty), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out target))
+                                                      && actual == target))
+                {
+                    yield return def;
+                }
+            }
         }
 
         private void LoadAndWatchConfiguration(Action<PacketDefinitions?> assignAction, string fileName)
@@ -235,12 +274,12 @@ namespace MUnique.OpenMU.Network.Analyzer
                     .GetByteValue(field.LengthSpecified ? field.Length : 8, field.LeftShifted)
                     .ToString(),
                 FieldType.Boolean => data[field.Index..].GetBoolean(field.LeftShifted).ToString(),
-                FieldType.IntegerLittleEndian => ReadUInt32LittleEndian(data[field.Index..]).ToString(),
-                FieldType.IntegerBigEndian => ReadUInt32BigEndian(data[field.Index..]).ToString(),
-                FieldType.ShortLittleEndian => ReadUInt16LittleEndian(data[field.Index..]).ToString(),
-                FieldType.ShortBigEndian => ReadUInt16BigEndian(data[field.Index..]).ToString(),
-                FieldType.LongLittleEndian => ReadUInt64LittleEndian(data[field.Index..]).ToString(),
-                FieldType.LongBigEndian => ReadUInt64BigEndian(data[field.Index..]).ToString(),
+                FieldType.IntegerLittleEndian => ReadUInt32LittleEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
+                FieldType.IntegerBigEndian => ReadUInt32BigEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
+                FieldType.ShortLittleEndian => ReadUInt16LittleEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
+                FieldType.ShortBigEndian => ReadUInt16BigEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
+                FieldType.LongLittleEndian => ReadUInt64LittleEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
+                FieldType.LongBigEndian => ReadUInt64BigEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
                 FieldType.Enum => this.ExtractEnumValue(data, field, packet, definitions),
                 FieldType.StructureArray => this.ExtractStructureArrayValues(data, field, packet, definitions),
                 FieldType.Float => BitConverter.ToSingle(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
@@ -260,7 +299,7 @@ namespace MUnique.OpenMU.Network.Analyzer
 
             var countField = packet.Fields?.FirstOrDefault(f => f.Name == field.ItemCountField)
                              ?? packet.Structures?.SelectMany(s => s.Fields ?? Enumerable.Empty<Field>()).FirstOrDefault(f => f.Name == field.ItemCountField);
-            int count = countField is null ? 0 : int.Parse(this.ExtractFieldValue(data, countField, packet, definitions));
+            int count = countField is null ? 0 : int.Parse(this.ExtractFieldValue(data, countField, packet, definitions), CultureInfo.InvariantCulture);
             if (count == 0)
             {
                 return string.Empty;

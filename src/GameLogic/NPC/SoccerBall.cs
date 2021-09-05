@@ -18,7 +18,7 @@ namespace MUnique.OpenMU.GameLogic.NPC
     /// </summary>
     public sealed class SoccerBall : NonPlayerCharacter, IAttackable, IMovable
     {
-        private readonly object moveLock = new object();
+        private readonly object moveLock = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SoccerBall"/> class.
@@ -60,6 +60,26 @@ namespace MUnique.OpenMU.GameLogic.NPC
             this.MoveToDirection(direction, skill is { });
         }
 
+        /// <inheritdoc />
+        public void ReflectDamage(IAttacker reflector, uint damage)
+        {
+            // A ball doesn't attack, so it doesn't reflect.
+        }
+
+        /// <inheritdoc />
+        public void ApplyPoisonDamage(IAttacker initialAttacker, uint damage)
+        {
+            // A ball doesn't take any damage
+        }
+
+        /// <inheritdoc />
+        public void Move(Point target)
+        {
+            var old = this.Position;
+            this.CurrentMap.Move(this, target, this.moveLock, MoveType.Instant);
+            this.Moved?.Invoke(this, (From: old, To: target));
+        }
+
         private void MoveToDirection(Direction direction, bool withSkill)
         {
             var terrain = this.CurrentMap.Terrain;
@@ -82,26 +102,6 @@ namespace MUnique.OpenMU.GameLogic.NPC
             {
                 this.Move(finalTarget);
             }
-        }
-
-        /// <inheritdoc />
-        public void ReflectDamage(IAttacker reflector, uint damage)
-        {
-            // A ball doesn't attack, so it doesn't reflect.
-        }
-
-        /// <inheritdoc />
-        public void ApplyPoisonDamage(IAttacker initialAttacker, uint damage)
-        {
-            // A ball doesn't take any damage
-        }
-
-        /// <inheritdoc />
-        public void Move(Point target)
-        {
-            var old = this.Position;
-            this.CurrentMap.Move(this, target, this.moveLock, MoveType.Instant);
-            this.Moved?.Invoke(this, (From: old, To: target));
         }
     }
 }

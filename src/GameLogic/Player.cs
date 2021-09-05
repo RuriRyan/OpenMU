@@ -35,7 +35,7 @@ namespace MUnique.OpenMU.GameLogic
     /// </summary>
     public class Player : IBucketMapObserver, IAttackable, IAttacker, ITrader, IPartyMember, IRotatable, IHasBucketInformation, IDisposable, ISupportWalk, IMovable, ILoggerOwner<Player>
     {
-        private readonly object moveLock = new object();
+        private readonly object moveLock = new ();
 
         private readonly Walker walker;
 
@@ -225,7 +225,7 @@ namespace MUnique.OpenMU.GameLogic
         public NonPlayerCharacter? OpenedNpc { get; set; }
 
         /// <inheritdoc/>
-        public StateMachine PlayerState { get; } = new StateMachine(GameLogic.PlayerState.Initial);
+        public StateMachine PlayerState { get; } = new (GameLogic.PlayerState.Initial);
 
         // TODO: TradeContext-object?
 
@@ -254,7 +254,7 @@ namespace MUnique.OpenMU.GameLogic
         public ISet<IWorldObserver> Observers { get; } = new HashSet<IWorldObserver>();
 
         /// <inheritdoc/>
-        public ReaderWriterLockSlim ObserverLock { get; } = new ReaderWriterLockSlim();
+        public ReaderWriterLockSlim ObserverLock { get; } = new ();
 
         /// <inheritdoc/>
         public IPartyMember? LastPartyRequester { get; set; }
@@ -294,12 +294,13 @@ namespace MUnique.OpenMU.GameLogic
         /// <inheritdoc/>
         public bool IsTeleporting { get; private set; }
 
+        /// <inheritdoc/>
         public DeathInformation? LastDeath { get; private set; }
 
         /// <inheritdoc/>
         public Point Position
         {
-            get => new Point(this.SelectedCharacter?.PositionX ?? 0, this.SelectedCharacter?.PositionY ?? 0);
+            get => new (this.SelectedCharacter?.PositionX ?? 0, this.SelectedCharacter?.PositionY ?? 0);
 
             set
             {
@@ -338,7 +339,7 @@ namespace MUnique.OpenMU.GameLogic
         public IStorage? Vault { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag, indicating if the vault of the player is currently locked by a pin.
+        /// Gets or sets a value indicating whether the vault of the player is currently locked by a pin.
         /// </summary>
         public bool IsVaultLocked { get; set; }
 
@@ -999,6 +1000,11 @@ namespace MUnique.OpenMU.GameLogic
             skillEntry.PowerUpDuration = this.Attributes!.CreateElement(powerUpDef.Duration);
         }
 
+        /// <summary>
+        /// Creates a summoned monster for the player.
+        /// </summary>
+        /// <param name="definition">The definition.</param>
+        /// <exception cref="InvalidOperationException">Can't add a summon for a player which isn't spawned yet.</exception>
         public void CreateSummonedMonster(MonsterDefinition definition)
         {
             if (this.CurrentMap is not { } gameMap)
@@ -1012,10 +1018,10 @@ namespace MUnique.OpenMU.GameLogic
                 MonsterDefinition = definition,
                 SpawnTrigger = SpawnTrigger.OnceAtEventStart,
                 Quantity = 1,
-                X1 = (byte) Math.Max(this.Position.X - 3, byte.MinValue),
-                X2 = (byte) Math.Min(this.Position.X + 3, byte.MaxValue),
-                Y1 = (byte) Math.Max(this.Position.Y - 3, byte.MinValue),
-                Y2 = (byte) Math.Min(this.Position.Y + 3, byte.MaxValue),
+                X1 = (byte)Math.Max(this.Position.X - 3, byte.MinValue),
+                X2 = (byte)Math.Min(this.Position.X + 3, byte.MaxValue),
+                Y1 = (byte)Math.Max(this.Position.Y - 3, byte.MinValue),
+                Y2 = (byte)Math.Min(this.Position.Y + 3, byte.MaxValue),
             };
             var intelligence = new SummonedMonsterIntelligence(this);
             var monster = new Monster(area, definition, gameMap, NullDropGenerator.Instance, intelligence, this.GameContext.PlugInManager);
@@ -1024,6 +1030,9 @@ namespace MUnique.OpenMU.GameLogic
             gameMap.Add(monster);
         }
 
+        /// <summary>
+        /// Notifies the player object that the summon died.
+        /// </summary>
         public void SummonDied()
         {
             this.Summon = null;
@@ -1337,6 +1346,8 @@ namespace MUnique.OpenMU.GameLogic
             this.Attributes.GetOrCreateAttribute(Stats.MaximumAbility).ValueChanged += (a, b) => this.OnMaximumManaOrAbilityChanged();
             this.Attributes.GetOrCreateAttribute(Stats.MaximumHealth).ValueChanged += (a, b) => this.OnMaximumHealthOrShieldChanged();
             this.Attributes.GetOrCreateAttribute(Stats.MaximumShield).ValueChanged += (a, b) => this.OnMaximumHealthOrShieldChanged();
+            this.Attributes.GetOrCreateAttribute(Stats.TransformationSkin).ValueChanged += (a, b) => this.OnTransformationSkinChanged();
+
             var ammoAttribute = this.Attributes.GetOrCreateAttribute(Stats.AmmunitionAmount);
             this.Attributes[Stats.AmmunitionAmount] = this.GetAmmunitionItem()?.Durability ?? 0;
             ammoAttribute.ValueChanged += (a, b) => this.OnAmmunitionAmountChanged();
@@ -1355,6 +1366,11 @@ namespace MUnique.OpenMU.GameLogic
                     this.Logger.LogError(ex, "Error occured when initializing the messenger.");
                 }
             });
+        }
+
+        private void OnTransformationSkinChanged()
+        {
+            this.ForEachWorldObserver(o => o.ViewPlugIns.GetPlugIn<INewPlayersInScopePlugIn>()?.NewPlayersInScope(this.GetAsEnumerable()), true);
         }
 
         /// <summary>

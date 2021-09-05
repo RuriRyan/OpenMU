@@ -17,7 +17,7 @@ namespace MUnique.OpenMU.GameLogic
     /// </summary>
     public sealed class ObserverToWorldViewAdapter : IBucketMapObserver, IDisposable
     {
-        private readonly ReaderWriterLockSlim observingLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim observingLock = new ();
         private readonly ISet<IObservable> observingObjects = new HashSet<IObservable>();
         private readonly IWorldObserver adaptee;
 
@@ -49,9 +49,7 @@ namespace MUnique.OpenMU.GameLogic
             }
 
             var item = eventArgs.Item;
-            if (item is IHasBucketInformation hasBucketInfo
-                && hasBucketInfo.OldBucket is not null
-                && this.ObservingBuckets.Contains(hasBucketInfo.OldBucket))
+            if (item is IHasBucketInformation { OldBucket: { } oldBucket } && this.ObservingBuckets.Contains(oldBucket))
             {
                 // we already observe the bucket where the object came from
                 return;
@@ -174,7 +172,7 @@ namespace MUnique.OpenMU.GameLogic
 
             oldItems.ForEach(item => item.RemoveObserver(this.adaptee));
 
-            if (this.adaptee is IHasBucketInformation bucketInformation && bucketInformation.NewBucket is null)
+            if (this.adaptee is IHasBucketInformation { NewBucket: null })
             {
                 // adaptee (player) left the map or disconnected; it's not required to update the view
             }

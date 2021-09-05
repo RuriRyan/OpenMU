@@ -18,7 +18,7 @@ namespace MUnique.OpenMU.AdminPanel.Services
     {
         private readonly LogService logService;
 
-        private readonly RingBuffer<LogEventData> entries = new RingBuffer<LogEventData>(20);
+        private readonly RingBuffer<LogEventData> entries = new (20);
         private string loggerFilter = string.Empty;
         private string characterFilter = string.Empty;
         private string serverFilter = string.Empty;
@@ -97,7 +97,7 @@ namespace MUnique.OpenMU.AdminPanel.Services
                 return stringProperty;
             }
 
-            if (logEventData.Properties[name] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.String)
+            if (logEventData.Properties[name] is JsonElement { ValueKind: JsonValueKind.String } jsonElement)
             {
                 return jsonElement.GetString() ?? string.Empty;
             }
